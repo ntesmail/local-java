@@ -1,0 +1,125 @@
+<project name="encoding" default="deploy" basedir=".">
+	<property file="./deploy.properties" />
+	<property name="temp.jar" location="${temp.dir}/${deploy.jar.name}-${deploy.jar.version}.jar" />
+	<property name="node-temp.jar" location="${temp.dir}/${deploy.jar.name}-node-${deploy.jar.version}.jar" />
+
+	<path id="classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+	<taskdef resource="net/sf/antcontrib/antlib.xml">  
+	    <classpath>  
+	        <pathelement location="./tools/ant-contrib-1.0b3.jar"/>  
+	     </classpath>  
+	</taskdef>
+    <target name="clean">
+        <delete dir="${build.dir}" />
+        <delete dir="${temp.dir}"/>
+    	<delete dir="${deploy.dir}"/>
+    </target>
+    	
+	<target name="compile" depends="clean">
+		<echo>Ant compile...</echo>
+		<mkdir dir="${build.dir}" />
+		<javac encoding="UTF-8" srcdir="src/java" destdir="${build.dir}" debug="true" optimize="true" includeantruntime="on">
+			<classpath refid="classpath">
+			</classpath>
+		</javac>
+		<!--
+		<copy todir="${build.dir}">
+			<fileset dir="resources">
+				<include name="commons-logging.properties" />
+			</fileset>
+		</copy>
+		-->
+	</target>
+
+	<target name="jar" depends="compile, unzip">
+		<echo>java packing...</echo>
+		<pathconvert property="mf.classpath" pathsep=" " description="把上面定义的path转换成property，path中jar包的路径用空格分开">
+			<mapper>
+				<chainedmapper>
+					<!-- 移除绝对路径 -->
+					<flattenmapper />
+					<!-- 加上lib前缀 -->
+					<globmapper from="*" to="${depend.dir}/*" />
+				</chainedmapper>
+			</mapper>
+			<path refid="classpath" description="path引用了上面定义的queue-classpath" />
+		</pathconvert>
+
+		<jar destfile="${temp.jar}" update="true">
+			<manifest>
+				<attribute name="Main-Class" value="com.heroyang.LocalDevelop" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="${build.dir}">
+			</fileset>
+		</jar>
+
+		<jar destfile="${node-temp.jar}" update="true">
+            <!-- define MANIFEST.MF -->
+            <manifest>
+                <attribute name="Main-Class" value="com.heroyang.Generator" />
+            	<attribute name="Class-Path" value="." />
+                <!--section name="common">
+                <attribute name="Specification-Title" value="${component.name}" />
+                <attribute name="Specification-Version" value="${component.version}" />
+                <attribute name="Specification-Vendor" value="${component.vendor}" /> <attribute name="Implementation-Title" value="${component.name}" /> <attribute name="Implementation-Version" value="${component.version} ${TODAY}" /> <attribute name="Implementation-Vendor" value="${component.vendor}" />
+                </section-->
+                <!-- finally, use the magically generated libs path -->
+                <!-- <attribute name="Class-Path" value=". ${mf.classpath}" /> -->
+            </manifest>
+            <fileset dir="${build.dir}">
+            </fileset>
+        </jar>
+	</target>
+
+
+	<target name="deploy" depends=" jar">
+		<echo>java packing...</echo>
+		<!--
+		<copy todir="${deploy.dir}/${depend.dir}" overwrite="true">
+			<fileset dir="lib">
+				<include name="**/*.jar" />
+			</fileset>
+		</copy>
+		-->
+		<copy todir="${deploy.dir}" file="${temp.jar}" overwrite="true">
+		</copy>
+		<copy todir="${deploy.dir}" file="${node-temp.jar}" overwrite="true">
+        </copy>
+		
+		<copy todir="${deploy.dir}">
+            <fileset dir="resources">
+                <include name="fmpp.config" />
+            	<include name="*.properties" />
+            </fileset>
+        </copy>
+		<delete dir="${build.dir}" />
+        <delete dir="${temp.dir}"/>
+		
+	</target>
+	
+	
+	<target name="unzip">
+	        <foreach list="" target="jarsigner" param="file.full.name" delimiter=",">
+	            <path id="base.path">
+	                <fileset dir="./lib">
+	                    <include name="*.jar"/>
+	                </fileset>
+	            </path>
+	        </foreach>
+	    </target>
+
+	    <target name="jarsigner">
+	        <echo>${file.full.name}</echo>
+	    	<unzip src="${file.full.name}" dest="${build.dir}">
+                   <patternset>  
+                         <exclude name="META-INF/**"/>
+                   	     <exclude name="**/*.html"/>
+                   </patternset>  
+            </unzip>
+	    </target>
+</project>
