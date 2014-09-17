@@ -25,14 +25,14 @@ public class MappingRegistry {
 				// 是否匹配
 				if (matcher.matches()) {
 					// 检查是否query参数匹配
-					if(entry.getMatchQuery() != null) {
-						String mqStr = ".*" + entry.getMatchQuery() + ".*";
-						Pattern pattern2 = Pattern.compile(mqStr);
-						matcher2 = pattern2.matcher(fullQuery);
-						if(!matcher2.matches()) {
-							System.out.println(fullQuery +" not matched: " + mqStr);
-							continue;
-						}
+					if(entry.getMatchQuery() != null && fullQuery != null && fullQuery.length() > 0) {
+							String mqStr = ".*" + entry.getMatchQuery() + ".*";
+							Pattern pattern2 = Pattern.compile(mqStr);
+							 matcher2 = pattern2.matcher(fullQuery);
+							 if(!matcher2.matches()) {
+							 	System.out.println(fullQuery +" not matched: " + mqStr);
+								continue;
+							 }
 					}
 					// 匹配到
 					Mapping map = new Mapping();
