@@ -22,7 +22,7 @@
 	<target name="compile" depends="clean">
 		<echo>Ant compile...</echo>
 		<mkdir dir="${build.dir}" />
-		<javac encoding="UTF-8" srcdir="src/java" destdir="${build.dir}" debug="true" optimize="true" includeantruntime="on">
+		<javac source="1.6" target="1.6" encoding="UTF-8" srcdir="src/java" destdir="${build.dir}" debug="true" optimize="true" includeantruntime="on">
 			<classpath refid="classpath">
 			</classpath>
 		</javac>
